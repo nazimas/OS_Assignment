@@ -2,7 +2,7 @@
 // Member 1: Muhammad Luqman Irfan bin Ahmad Kamal Peong
 // Member 2: Wisyal Faridz Aimizil bin Mohd Fauzi
 // Member 3: Ameer Harith Bin Mohd Hazali
-// Member 4:
+// Member 4: Abdul Nasser Kolathumkara Muhammed Nazim
 #include <iostream>
 #include <queue>
 #include <vector>
@@ -26,6 +26,7 @@ void printResults(std::vector<Process> processes);
 void roundRobin(std::vector<Process> &processes, int quantum);
 void nonshortestJobFirst(std::vector<Process> &processes);
 void nonPreemptivePriority(std::vector<Process> &processes);
+void shortestRemainingTime(std::vector<Process> &processes);
 // put your function definition here here guys.
 int main()
 {
@@ -53,6 +54,7 @@ int main()
         else if (x == 3)
         {
             vector<Process> processList = getProcesses();
+            shortestRemainingTime(processList);
             // TODO
         }
         else if (x == 4)
@@ -267,7 +269,53 @@ void nonPreemptivePriority(std::vector<Process> &processes)
     printGanttChart(ganttChart);
     printResults(processes);
 }
-
+void shortestRemainingTime(std::vector<Process> &processes)
+{
+    int n = processes.size();
+    // size
+    int time = 0;
+    // time
+    int completed = 0;
+    vector<pair<int, int>> ganttChart;
+    // gantt chart example process name time
+    while (completed < n) // if not completed
+    {
+        int shortestRemainingIndex = -1;
+        int minRemainingTime = INT_MAX;
+        for (int i = 0; i < n; ++i) // loop
+        {
+            if (processes[i].arrivalTime <= time && processes[i].remainingTime > 0)
+            { // if arrival time is less than time and process remaining time more than 0
+                if (processes[i].remainingTime < minRemainingTime)
+                { // and if process remaining time is less than minimum remaining time
+                    minRemainingTime = processes[i].remainingTime;
+                    // minimum remaining time = process remaining time
+                    shortestRemainingIndex = i;
+                    // SRT index
+                }
+            }
+        } // loop ends
+        if (shortestRemainingIndex != -1) // if SRT index is not equal -!(initialised)
+        {
+            ganttChart.emplace_back(processes[shortestRemainingIndex].id, 1);
+            processes[shortestRemainingIndex].remainingTime--;
+            time++;
+            if (processes[shortestRemainingIndex].remainingTime == 0)
+            {
+                completed++;
+                processes[shortestRemainingIndex].finishedTime = time;
+                processes[shortestRemainingIndex].turnaroundTime = time - processes[shortestRemainingIndex].arrivalTime;
+                processes[shortestRemainingIndex].waitingTime = processes[shortestRemainingIndex].turnaroundTime - processes[shortestRemainingIndex].burstTime;
+            }
+        }
+        else
+        {
+            time++;
+        }
+    }
+    printGanttChart(ganttChart);
+    printResults(processes);
+}
 void nonshortestJobFirst(std::vector<Process> &processes)
 {
     int n = processes.size();
